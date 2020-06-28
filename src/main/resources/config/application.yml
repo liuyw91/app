@@ -1,0 +1,38 @@
+spring:
+  profiles:
+#    active: dev
+    active: bs
+
+  http:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
+# 服务配置
+server:
+  servlet:
+    context-path: /
+  port: 8083
+  tomcat:
+    uri-encoding: UTF-8
+
+# 扫描mapper文件
+mybatis-plus:
+  mapper-locations: classpath:mapper/*/*Mapper.xml
+
+# 七牛云
+qiniu:
+  accessKey: 05n0muD343DN6_lOfNjLNImPGTuQAdE_SUxcVa41
+  secretKey: esoel5DQY5w9VDOtxxStesphGDva5MFzpT_HV8Nx
+  bucket: rh-picture
+  domain: https://pic.yunmiapp.com
+
+
+wyyx:
+  appKey: a9b9066f87460772dc2002eb9e5b41fc
+  secret: 88e7aa464765
+  secretaryAccount: 7a537f382c0d4f74b55c83eba0b827cc
+
+
+

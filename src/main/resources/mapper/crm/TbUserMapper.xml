@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yunmi.app.mapper.crm.TbUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.yunmi.app.model.crm.TbUser">
+      <id column="ID" property="id"/>
+      <result column="NAME" property="name"/>
+      <result column="PASSWORD" property="password"/>
+      <result column="PHONE" property="phone"/>
+      <result column="GENDER" property="gender"/>
+      <result column="WECHAT_CODE" property="wechatCode"/>
+      <result column="BIRTH_DAY" property="birthDay"/>
+      <result column="LONGITUDE" property="longitude"/>
+      <result column="LATITUDE" property="latitude"/>
+      <result column="HEAD_IMG" property="headImg"/>
+      <result column="CONSTELLATION" property="constellation"/>
+      <result column="INDUSTRY" property="industry"/>
+      <result column="WORK_AREA" property="workArea"/>
+      <result column="SIGN" property="sign"/>
+      <result column="CREATE_DATE" property="createDate"/>
+      <result column="STATUS" property="status"/>
+      <result column="CHECK_STATUS" property="checkStatus"/>
+      <result column="AGE" property="age"/>
+    </resultMap>
+
+    <!-- 用户列表查询结果列 -->
+    <sql id="User_Column_List">
+        u.ID, u.NAME, u.PASSWORD, u.PHONE, u.GENDER, u.WECHAT_CODE, u.BIRTH_DAY, u.LONGITUDE, u.LATITUDE, u.HEAD_IMG, u.CONSTELLATION, u.INDUSTRY, u.WORK_AREA, u.SIGN, u.CREATE_DATE, u.STATUS, h.CHECK_STATUS
+    </sql>
+
+    <!-- 头像审核查询结果列 -->
+    <sql id="Approval_Column_List">
+        u.ID, u.NAME, u.PASSWORD, u.PHONE, u.GENDER, u.WECHAT_CODE, TIMESTAMPDIFF(YEAR,u.BIRTH_DAY,NOW()) as age, u.LONGITUDE, u.LATITUDE, h.HEAD_IMG, u.CONSTELLATION, u.INDUSTRY, u.WORK_AREA, u.SIGN, u.CREATE_DATE, u.STATUS, h.CHECK_STATUS
+    </sql>
+
+    <!-- 统计图查询语句 -->
+    <select id="countUser" resultType="java.util.Map" parameterType="java.util.Map">
+        SELECT
+        count(1) sum,
+        count(CASE sex WHEN '1' THEN sex END) male,
+        count(CASE sex WHEN '0' THEN sex END ) female,
+        count(CASE sex WHEN '-' THEN sex END ) other
+        FROM
+        (select case when GENDER is null then '-' else GENDER end sex, CREATE_DATE from tb_user) a
+      WHERE 1=1
+      <if test="startDate != null and startDate !=''">
+        AND CREATE_DATE <![CDATA[>=]]>  #{startDate}
+      </if>
+      <if test="endDate != null and endDate != ''">
+        AND CREATE_DATE <![CDATA[<=]]>  #{endDate}
+      </if>
+    </select>
+
+  <!-- 自定义用户列表 sql 语句分页查询 -->
+    <select id="queryListByPage" resultType="com.yunmi.app.model.crm.TbUser">
+      SELECT
+      <include refid="User_Column_List" />
+      FROM tb_user u
+      INNER JOIN tb_user_head_img_approval h
+      ON u.id = h.create_user
+      ${ew.customSqlSegment}
+    </select>
+
+
+    <!-- 自定义审核列表 sql 语句分页查询 -->
+    <select id="queryApprovalListByPage" resultType="com.yunmi.app.model.crm.TbUser">
+        SELECT
+        <include refid="Approval_Column_List" />
+        FROM tb_user u
+        INNER JOIN tb_user_head_img_approval h
+        ON u.id = h.create_user
+        ${ew.customSqlSegment}
+    </select>
+
+    <!-- 获取指定某条数据 -->
+    <select id="querySomeUser" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Approval_Column_List" />
+        FROM tb_user u, tb_user_head_img_approval h
+        WHERE u.id = h.create_user
+        AND h.CHECK_STATUS = 0
+        <if test="startDate != null">
+            AND u.CREATE_DATE <![CDATA[>=]]>  #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND u.CREATE_DATE <![CDATA[<=]]>  #{endDate}
+        </if>
+        ORDER BY u.CREATE_DATE DESC
+        LIMIT #{currentIndex},1
+    </select>
+
+</mapper>
