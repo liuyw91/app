@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <lang3.version>3.4</lang3.version>
+        <lang3.version>3.18.0</lang3.version>
         <mybatisplus.version>3.1.0</mybatisplus.version>
         <dynamic.version>2.4.2</dynamic.version>
     </properties>
